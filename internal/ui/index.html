@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exile Settings</title>
+<style>
+:root {
+  --bg: #f5f5f7;
+  --sidebar: #ebebed;
+  --sidebar-border: rgba(0, 0, 0, .08);
+  --group: #ffffff;
+  --group-border: rgba(0, 0, 0, .06);
+  --separator: rgba(0, 0, 0, .08);
+  --text: #1d1d1f;
+  --text-2: #6e6e73;
+  --text-3: #a1a1a6;
+  --accent: #007aff;
+  --accent-pressed: #0062cc;
+  --switch-off: #e3e3e8;
+  --field: #ffffff;
+  --field-border: rgba(0, 0, 0, .14);
+  --control: #ffffff;
+  --control-shadow: 0 0 0 .5px rgba(0, 0, 0, .14), 0 1px 1.5px rgba(0, 0, 0, .08);
+  --hover: rgba(0, 0, 0, .04);
+  --selected-row: rgba(0, 122, 255, .12);
+  --danger: #ff3b30;
+  --warning-bg: #fff7e6;
+  --warning-border: #ffd38a;
+  --sheet-backdrop: rgba(0, 0, 0, .18);
+  --blue: #007aff; --indigo: #5856d6; --gray: #8e8e93; --graphite: #636366;
+  --orange: #ff9500; --green: #34c759; --teal: #30b0c7; --purple: #af52de;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1e1e1e;
+    --sidebar: #262628;
+    --sidebar-border: rgba(255, 255, 255, .06);
+    --group: #2a2a2c;
+    --group-border: rgba(255, 255, 255, .05);
+    --separator: rgba(255, 255, 255, .08);
+    --text: #f5f5f7;
+    --text-2: #98989d;
+    --text-3: #636366;
+    --accent: #0a84ff;
+    --accent-pressed: #409cff;
+    --switch-off: #3a3a3c;
+    --field: #1c1c1e;
+    --field-border: rgba(255, 255, 255, .12);
+    --control: #4a4a4c;
+    --control-shadow: 0 0 0 .5px rgba(0, 0, 0, .4), 0 1px 1px rgba(0, 0, 0, .25);
+    --hover: rgba(255, 255, 255, .05);
+    --selected-row: rgba(10, 132, 255, .22);
+    --danger: #ff453a;
+    --warning-bg: #3a2e14;
+    --warning-border: #6b5220;
+    --sheet-backdrop: rgba(0, 0, 0, .45);
+    --blue: #0a84ff; --indigo: #5e5ce6; --gray: #8e8e93; --graphite: #7c7c80;
+    --orange: #ff9f0a; --green: #30d158; --teal: #40c8e0; --purple: #bf5af2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.38 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+svg { display: block; }
+
+.app { display: grid; grid-template-columns: 236px 1fr; height: 100%; }
+
+/* Sidebar */
+.sidebar {
+  background: var(--sidebar);
+  border-right: 1px solid var(--sidebar-border);
+  padding: 18px 10px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 16px; }
+.brand .logo { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(160deg, #3a3a3c, #1c1c1e); display: grid; place-items: center; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.brand b { font-size: 15px; letter-spacing: .2px; }
+.brand span { display: block; color: var(--text-2); font-size: 11px; }
+.side-label { color: var(--text-3); font-size: 11px; font-weight: 600; padding: 12px 10px 4px; }
+.side-item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 5px 8px; border: 0; border-radius: 7px; background: none;
+  text-align: left; cursor: default; min-height: 30px;
+}
+.side-item:hover { background: var(--hover); }
+.side-item.active { background: var(--accent); color: #fff; }
+.side-item.active .sub { color: rgba(255,255,255,.75); }
+.side-item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.side-item .sub { color: var(--text-3); font-size: 11px; }
+.side-add { color: var(--accent); }
+.side-add.side-item:hover { background: var(--hover); }
+
+.icon {
+  width: 22px; height: 22px; border-radius: 6px; flex: none;
+  display: grid; place-items: center; color: #fff;
+  box-shadow: inset 0 0 0 .5px rgba(0,0,0,.08);
+}
+.icon.lg { width: 56px; height: 56px; border-radius: 14px; }
+.icon.md { width: 28px; height: 28px; border-radius: 7px; }
+
+/* Content */
+.content { overflow-y: auto; }
+.page { max-width: 700px; margin: 0 auto; padding: 28px 28px 60px; }
+.header { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.header h1 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: -.2px; }
+.header p { margin: 2px 0 0; color: var(--text-2); word-break: break-all; }
+
+.section { margin-top: 22px; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 0 4px 7px; }
+.section-head h2 { font-size: 13px; font-weight: 700; margin: 0; }
+.section-head p { margin: 1px 0 0; color: var(--text-2); font-size: 12px; }
+.group {
+  background: var(--group);
+  border: 1px solid var(--group-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; min-height: 46px; position: relative;
+}
+.row + .row::before {
+  content: ""; position: absolute; top: 0; right: 0; left: 44px;
+  border-top: 1px solid var(--separator);
+}
+.row .label { flex: 1; min-width: 0; }
+.row .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .path { color: var(--text-2); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: rtl; text-align: left; }
+.row .path bdi { direction: ltr; unicode-bidi: isolate; }
+.row.off .icon { opacity: .35; }
+.row.off .title, .row.off .path { color: var(--text-3); }
+.row .value { color: var(--text-2); white-space: nowrap; }
+.empty { color: var(--text-2); justify-content: center; }
+.badge { font-size: 11px; color: var(--text-2); background: var(--hover); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
+.missing { color: var(--danger); }
+
+.actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.note { color: var(--text-2); font-size: 12px; padding: 7px 4px 0; }
+.footer { color: var(--text-3); font-size: 11.5px; margin-top: 30px; text-align: center; word-break: break-all; }
+
+.banner {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--warning-bg); border: 1px solid var(--warning-border);
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 4px;
+}
+.banner .icon { width: 20px; height: 20px; }
+.banner.info { background: color-mix(in srgb, var(--accent) 9%, var(--group)); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+/* Controls */
+.switch { position: relative; width: 38px; height: 22px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: default; }
+.switch span {
+  position: absolute; inset: 0; border-radius: 11px; background: var(--switch-off);
+  transition: background .18s ease; pointer-events: none;
+  box-shadow: inset 0 0 0 .5px rgba(0,0,0,.06);
+}
+.switch span::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 0 0 .5px rgba(0,0,0,.06);
+  transition: transform .18s ease;
+}
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::after { transform: translateX(16px); }
+.switch input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 1px; }
+
+.popup {
+  appearance: none; -webkit-appearance: none;
+  background: var(--control) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='12' viewBox='0 0 8 12'%3E%3Cpath d='M1 4.5 4 1.5 7 4.5M1 7.5 4 10.5 7 7.5' fill='none' stroke='%238e8e93' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 7px center;
+  border: 0; border-radius: 6px; box-shadow: var(--control-shadow);
+  padding: 3px 24px 3px 9px; min-height: 22px;
+}
+.popup:focus-visible, .button:focus-visible, .field:focus { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 0; }
+.button {
+  border: 0; border-radius: 6px; padding: 4px 12px; min-height: 24px;
+  background: var(--control); box-shadow: var(--control-shadow); cursor: default;
+}
+.button:active { filter: brightness(.95); }
+.button.primary { background: var(--accent); color: #fff; box-shadow: 0 1px 1.5px rgba(0,0,0,.15); }
+.button.primary:active { background: var(--accent-pressed); }
+.button:disabled { opacity: .45; }
+.icon-button {
+  width: 24px; height: 24px; border: 0; border-radius: 6px; background: none; color: var(--text-3);
+  display: grid; place-items: center; flex: none; opacity: 0; transition: opacity .12s;
+}
+.row:hover .icon-button, .icon-button:focus-visible { opacity: 1; }
+.icon-button:hover { background: var(--hover); color: var(--danger); }
+@media (hover: none) { .icon-button { opacity: 1; } }
+.field {
+  background: var(--field); border: 1px solid var(--field-border); border-radius: 6px;
+  padding: 4px 8px; min-height: 24px; min-width: 0;
+}
+.field::placeholder { color: var(--text-3); }
+
+/* Sheet */
+.backdrop {
+  position: fixed; inset: 0; background: var(--sheet-backdrop);
+  display: grid; place-items: start center; padding: 40px 16px; z-index: 10;
+  animation: fade .15s ease;
+}
+.sheet {
+  width: min(560px, 100%); background: var(--group); border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.2);
+  display: flex; flex-direction: column; max-height: calc(100vh - 80px);
+  animation: drop .2s cubic-bezier(.2, .9, .3, 1.1);
+}
+.sheet h3 { margin: 0; padding: 16px 18px 4px; font-size: 14px; }
+.sheet .hint { margin: 0; padding: 0 18px 12px; color: var(--text-2); font-size: 12px; }
+.crumbs { display: flex; align-items: center; gap: 2px; padding: 0 14px 8px; flex-wrap: wrap; }
+.crumbs button { border: 0; background: none; padding: 2px 5px; border-radius: 5px; color: var(--text-2); }
+.crumbs button:hover { background: var(--hover); color: var(--text); }
+.crumbs button:last-child { color: var(--text); font-weight: 600; }
+.crumbs .sep { color: var(--text-3); }
+.browser { margin: 0 14px; border: 1px solid var(--separator); border-radius: 8px; overflow-y: auto; height: 320px; background: var(--field); }
+.entry { display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 10px; min-height: 34px; user-select: none; }
+.entry + .entry { box-shadow: inset 0 1px 0 var(--separator); }
+.entry.dir { cursor: pointer; }
+.entry.dir:hover { background: var(--hover); }
+.entry .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.entry.locked { color: var(--text-3); }
+.entry .chev { color: var(--text-3); width: 12px; }
+.pill {
+  border: 0; border-radius: 11px; padding: 2px 11px; min-height: 22px; font-size: 12px; font-weight: 600;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); cursor: pointer;
+}
+.pill:hover { background: var(--accent); color: #fff; }
+.pill:disabled { opacity: .5; }
+.added { font-size: 12px; font-weight: 600; color: var(--green); padding: 0 6px; white-space: nowrap; }
+.sheet-foot { display: flex; align-items: center; gap: 8px; padding: 14px 18px 16px; flex-wrap: wrap; }
+.sheet-foot .spacer { flex: 1; }
+.link { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; font-weight: 600; }
+.link:hover { text-decoration: underline; }
+.dropzone {
+  margin-top: 10px; padding: 20px 16px; border: 1.5px dashed var(--field-border); border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; color: var(--text-2);
+}
+.dropzone .icon { width: 30px; height: 30px; border-radius: 8px; }
+.dropzone b { color: var(--text); font-weight: 600; }
+.drop-overlay {
+  position: fixed; inset: 12px; z-index: 30; display: none; place-items: center; pointer-events: none;
+  border: 2px dashed var(--accent); border-radius: 16px; color: var(--accent); font-size: 15px; font-weight: 600;
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+}
+body.dragging .drop-overlay { display: grid; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: rgba(30,30,32,.92); color: #fff; padding: 9px 14px; border-radius: 10px;
+  max-width: min(560px, calc(100% - 32px)); box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  z-index: 20; animation: rise .2s ease;
+}
+.toast.error { background: rgba(200,40,30,.95); }
+@keyframes fade { from { opacity: 0; } }
+@keyframes drop { from { transform: translateY(-16px); opacity: 0; } }
+@keyframes rise { from { transform: translate(-50%, 10px); opacity: 0; } }
+
+@media (max-width: 720px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .sidebar { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--sidebar-border); }
+  .brand, .side-label { display: none; }
+  .side-item { width: auto; flex: none; }
+  .side-item .sub { display: none; }
+  .page { padding: 20px 16px 48px; }
+  .icon-button { opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="content"><div class="page" id="page"></div></main>
+</div>
+<div id="layer"></div>
+<div class="drop-overlay">Drop to give the agent access</div>
+
+<script>
+"use strict";
+
+const token = location.hash.slice(1);
+const AGENTS = { claude: "Claude Code", codex: "Codex", cline: "Cline" };
+const MODES = [["rw", "Read & Write"], ["ro", "Read Only"], ["hidden", "Hidden"]];
+
+const ICONS = {
+  folder: '<path d="M3.5 7.5a2 2 0 0 1 2-2h3.6l2 2h7.4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" fill="currentColor"/>',
+  file: '<path d="M7 3.5h6.5l4.5 4.5v10.5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z" fill="currentColor"/><path d="M13.5 3.5V8h4.5" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="1.2"/>',
+  hidden: '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M4 20 20 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  lock: '<rect x="5.5" y="10.5" width="13" height="9.5" rx="2" fill="currentColor"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/>',
+  shield: '<path d="M12 3.2 19 6v5.6c0 4.4-3 7.7-7 9.2-4-1.5-7-4.8-7-9.2V6z" fill="currentColor"/><path d="m9 12 2.2 2.2L15.3 10" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  globe: '<circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.8 12h16.4M12 3.8c2.4 2.3 3.4 5.1 3.4 8.2s-1 5.9-3.4 8.2c-2.4-2.3-3.4-5.1-3.4-8.2s1-5.9 3.4-8.2z" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  volume: '<ellipse cx="12" cy="6.5" rx="7" ry="2.8" fill="currentColor"/><path d="M5 6.5v11c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 12c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8" fill="none" stroke="currentColor" stroke-width="2"/>',
+  all: '<rect x="4" y="4" width="7" height="7" rx="1.8" fill="currentColor"/><rect x="13" y="4" width="7" height="7" rx="1.8" fill="currentColor"/><rect x="4" y="13" width="7" height="7" rx="1.8" fill="currentColor"/><rect x="13" y="13" width="7" height="7" rx="1.8" fill="currentColor"/>',
+  exile: '<rect x="4.5" y="7" width="15" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 7V5.5h8V7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m9 11 2 1.6L9 14.2M12.5 14.5H15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  warning: '<path d="M12 4 21 19.5H3z" fill="currentColor"/><path d="M12 10v4.5M12 17v.3" stroke="#fff" stroke-width="2" stroke-linecap="round"/>',
+  plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  remove: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 12h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  chevron: '<path d="m9.5 6.5 5.5 5.5-5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  up: '<path d="M12 18V6M6.5 11.5 12 6l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+};
+
+function svg(name, size = 14) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
+}
+function icon(name, color, cls = "") {
+  return `<span class="icon ${cls}" style="background:${color}">${svg(name, cls === "lg" ? 34 : cls === "md" ? 18 : 14)}</span>`;
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function base(p) { return p === "/" ? "/" : p.split("/").filter(Boolean).pop(); }
+function tilde(p) {
+  const home = state && state.home;
+  return home && (p === home || p.startsWith(home + "/")) ? "~" + p.slice(home.length) : p;
+}
+
+let state = null;
+let selected = null;
+let extraProjects = [];
+
+async function api(method, path, body) {
+  const res = await fetch(path, {
+    method,
+    headers: { "X-Exile-Token": token, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+async function load(project) {
+  const query = project === undefined ? "" : "?project=" + encodeURIComponent(project);
+  try {
+    state = await api("GET", "/api/state" + query);
+    selected = state.project;
+    render();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function mutate(method, path, body) {
+  try {
+    state = await api(method, path, { project: selected, ...body });
+    render();
+    if (state.session && state.session.pending) applySoon();
+    return true;
+  } catch (e) {
+    toast(e.message, true);
+    render();
+    return false;
+  }
+}
+
+/* Rendering */
+
+function render() {
+  renderSidebar();
+  renderPage();
+}
+
+function renderSidebar() {
+  const projects = [...new Set([...state.projects, ...extraProjects])].sort();
+  const item = (value, label, sub, iconHTML) => `
+    <button class="side-item ${value === selected ? "active" : ""}" data-select="${esc(value)}" title="${esc(value || "All projects")}">
+      ${iconHTML}<span class="name">${esc(label)}</span>${sub ? `<span class="sub">${esc(sub)}</span>` : ""}
+    </button>`;
+  document.getElementById("sidebar").innerHTML = `
+    <div class="brand"><span class="logo">${svg("exile", 20)}</span><div><b>Exile</b><span>Agent access</span></div></div>
+    <div class="side-label">General</div>
+    ${item("", "All Projects", "", icon("all", "var(--graphite)"))}
+    <div class="side-label">Projects</div>
+    ${projects.map(p => item(p, base(p), p === state.current ? "current" : "", icon("folder", "var(--blue)"))).join("")}
+    <button class="side-item side-add" data-action="add-project">${svg("plus", 14)}<span class="name">Add Project…</span></button>`;
+}
+
+function modeIcon(e) {
+  if (e.mode === "hidden") return icon("hidden", "var(--gray)", "md");
+  const glyph = e.kind === "file" ? "file" : "folder";
+  return icon(glyph, e.mode === "ro" ? "var(--indigo)" : "var(--blue)", "md");
+}
+
+function pathLine(e) {
+  let p = tilde(e.source);
+  if (e.target && e.target !== e.source && e.mode !== "hidden") p += "  →  " + e.target;
+  return `<div class="path"><bdi>${esc(p)}</bdi></div>`;
+}
+
+function entryRow(e) {
+  const global = selected === "";
+  const options = MODES.map(([v, label]) =>
+    `<option value="${v}" ${v === e.mode ? "selected" : ""} ${v === "hidden" && global ? "disabled" : ""}>${label}</option>`).join("");
+  return `
+    <div class="row ${e.disabled ? "off" : ""}">
+      ${modeIcon(e)}
+      <div class="label">
+        <div class="title">${esc(base(e.source))} ${e.kind === "missing" ? '<span class="badge missing">missing</span>' : ""}</div>
+        ${pathLine(e)}
+      </div>
+      <select class="popup" data-mode="${esc(e.source)}" aria-label="Access">${options}</select>
+      <label class="switch" title="${e.disabled ? "Off" : "On"}">
+        <input type="checkbox" data-toggle="${esc(e.source)}" ${e.disabled ? "" : "checked"} aria-label="Mount ${esc(base(e.source))}">
+        <span></span>
+      </label>
+      <button class="icon-button" data-remove="${esc(e.source)}" title="Remove" aria-label="Remove">${svg("remove", 16)}</button>
+    </div>`;
+}
+
+const SCOPE_TEXT = {
+  default: ["Project folder", "var(--blue)", "folder"],
+  protected: ["Read only: tools on your Mac run this", "var(--orange)", "shield"],
+  global: ["From All Projects", "var(--teal)", null],
+};
+const MODE_TEXT = { rw: "Read & Write", ro: "Read Only", hidden: "Hidden" };
+
+function automaticRow(e) {
+  const [note, color, glyph] = SCOPE_TEXT[e.scope] || ["", "var(--gray)", null];
+  const g = glyph || (e.mode === "hidden" ? "hidden" : e.kind === "file" ? "file" : "folder");
+  return `
+    <div class="row">
+      ${icon(g, color, "md")}
+      <div class="label"><div class="title">${esc(base(e.source))}</div>${pathLine(e)}</div>
+      <span class="badge">${esc(note)}</span>
+      <span class="value">${MODE_TEXT[e.mode]}</span>
+    </div>`;
+}
+
+function agentRow(agent, hosts) {
+  return `
+    <div class="row">
+      ${icon("globe", "var(--purple)", "md")}
+      <div class="label"><div class="title">${esc(AGENTS[agent] || agent)}</div><div class="path" style="direction:ltr" title="${esc(hosts.join(", "))}">${esc(hosts.join(", "))}</div></div>
+      <span class="badge">Always allowed for this agent</span>
+    </div>`;
+}
+
+function hostRow(name) {
+  return `
+    <div class="row">
+      ${icon("globe", "var(--teal)", "md")}
+      <div class="label"><div class="title">${esc(name)}</div><div class="path">HTTPS, port 443</div></div>
+      <button class="icon-button" data-disallow="${esc(name)}" title="Remove" aria-label="Remove">${svg("remove", 16)}</button>
+    </div>`;
+}
+
+function agentConfigSection() {
+  const bySection = {};
+  for (const v of state.agentVars || []) (bySection[v.section] ||= []).push(v.name);
+  const rows = [...Object.entries(AGENTS), ["all", "All agents"]].map(([section, label]) => {
+    const names = bySection[section] || [];
+    return `
+      <div class="row ${names.length ? "" : "off"}">
+        ${icon("lock", names.length ? "var(--green)" : "var(--gray)", "md")}
+        <div class="label"><div class="title">${esc(label)}</div>
+          <div class="path" style="direction:ltr">${names.length ? esc(names.join(", ")) : "Nothing configured"}</div></div>
+        ${names.length ? `<span class="badge">${names.length} variable${names.length === 1 ? "" : "s"}</span>` : ""}
+      </div>`;
+  }).join("");
+  return `
+    <div class="section">
+      <div class="section-head"><div><h2>Agent Configuration</h2><p>Credentials and environment variables, copied into each agent's container at start. Values are never shown here.</p></div></div>
+      <div class="group">${rows}</div>
+      <div class="note">Edit with <b>exile config</b> · <bdi>${esc(tilde(state.agentConfig))}</bdi></div>
+    </div>`;
+}
+
+function renderPage() {
+  const global = selected === "";
+  const title = global ? "All Projects" : base(selected);
+  const subtitle = global ? "Applies to every project in addition to its own settings." : tilde(selected);
+  const entries = state.entries || [];
+  const allow = state.allow || [];
+
+  let html = `
+    <div class="header">
+      ${global ? icon("all", "var(--graphite)", "lg") : icon("folder", "var(--blue)", "lg")}
+      <div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>
+    </div>`;
+
+  if (state.session && (global || selected === state.current)) {
+    const pending = state.session.pending;
+    html += `
+      <div class="banner info">
+        ${icon("exile", "var(--accent)")}
+        <div style="flex:1"><b>An agent is running in ${esc(base(state.current))}.</b><br>${pending && applying
+          ? "Applying your changes. For new files and folders the agent restarts and continues its conversation."
+          : pending
+          ? "Some settings changed outside this page and are not active yet."
+          : "Changes here apply right away. For new files and folders the agent restarts briefly and continues its conversation."}</div>
+        ${pending && !applying ? '<button class="button primary" data-action="apply" style="align-self:center">Apply Now</button>' : ""}
+      </div>`;
+  }
+
+  if (state.error) {
+    html += `<div class="banner">${icon("warning", "var(--orange)")}<div><b>exile start would refuse this project.</b><br>${esc(state.error)}</div></div>`;
+  }
+
+  html += `
+    <div class="section">
+      <div class="section-head"><div><h2>Files &amp; Folders</h2><p>The agent sees only what is listed here and below, at the same paths as on your Mac.</p></div></div>
+      ${entries.length ? `<div class="group">${entries.map(entryRow).join("")}</div>` : ""}
+      <div class="dropzone">
+        ${icon("plus", "var(--accent)", "md")}
+        <div><b>Drag files or folders here</b> from Finder, or <button class="link" data-action="add-mount">browse your Mac</button></div>
+      </div>
+    </div>`;
+
+  if (!global) {
+    const auto = state.automatic || [];
+    html += `
+      <div class="section">
+        <div class="section-head"><div><h2>Applied Automatically</h2><p>Add an entry above for the same path to override it.</p></div></div>
+        <div class="group">
+          ${auto.map(automaticRow).join("")}
+          <div class="row">
+            ${icon("volume", "var(--green)", "md")}
+            <div class="label"><div class="title">Agent home</div><div class="path"><bdi>${esc(state.homeVolume)}  →  /home/agent</bdi></div></div>
+            <span class="badge">Docker volume, this project only</span>
+            <span class="value">Read &amp; Write</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const byAgent = {};
+  for (const h of state.agentHosts || []) (byAgent[h.scope] ||= []).push(h.name);
+  html += `
+    <div class="section">
+      <div class="section-head"><div><h2>Network</h2><p>HTTPS to these hosts only. Everything else, including your Mac and local network, is blocked.</p></div></div>
+      <div class="group">
+        ${Object.entries(byAgent).map(([agent, hosts]) => agentRow(agent, hosts)).join("")}
+        ${allow.map(hostRow).join("")}
+        <form class="row" data-form="allow">
+          ${icon("plus", "var(--gray)", "md")}
+          <input class="field" name="host" placeholder="example.com or *.example.com" style="flex:1" autocomplete="off" spellcheck="false">
+          <button class="button" type="submit">Allow</button>
+        </form>
+      </div>
+    </div>
+    ${agentConfigSection()}
+    <div class="footer">Changes apply the next time you run <b>exile start</b>.<br>${esc(state.config)}</div>`;
+
+  document.getElementById("page").innerHTML = html;
+}
+
+/* Events */
+
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-select],[data-action],[data-remove],[data-disallow]");
+  if (!t || layer.contains(t)) return;
+  if (t.dataset.select !== undefined) return load(t.dataset.select);
+  if (t.dataset.remove) return mutate("DELETE", "/api/mount", { source: t.dataset.remove });
+  if (t.dataset.disallow) return mutate("DELETE", "/api/host", { host: t.dataset.disallow });
+  if (t.dataset.action === "add-mount") return showBrowser("mount");
+  if (t.dataset.action === "add-project") return showBrowser("project");
+  if (t.dataset.action === "apply") return applyNow(t);
+});
+
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.toggle) mutate("PATCH", "/api/mount", { source: t.dataset.toggle, disabled: !t.checked });
+  if (t.dataset.mode) mutate("PATCH", "/api/mount", { source: t.dataset.mode, mode: t.value });
+});
+
+document.addEventListener("submit", async e => {
+  const form = e.target.closest("[data-form=allow]");
+  if (!form) return;
+  e.preventDefault();
+  const host = form.host.value.trim();
+  if (host && await mutate("POST", "/api/host", { host })) toast(`${host} allowed`);
+});
+
+window.addEventListener("focus", () => state && load(selected));
+
+// Changes made here apply to the running agent right away. A short delay
+// bundles several quick changes into one restart.
+let applyTimer = null;
+let applying = false;
+
+function applySoon() {
+  clearTimeout(applyTimer);
+  applyTimer = setTimeout(applyNow, 800);
+}
+
+async function applyNow(button) {
+  if (button) button.disabled = true;
+  const first = !applying;
+  applying = true;
+  try {
+    const res = await api("POST", "/api/apply");
+    if (first) toast(res.message);
+  } catch (e) {
+    applying = false;
+    toast(e.message, true);
+    return load(selected);
+  }
+  // A restart takes a few seconds; changes made during it are applied after.
+  setTimeout(async () => {
+    await load(selected);
+    if (state.session && state.session.pending) applyNow();
+    else applying = false;
+  }, 4000);
+  load(selected);
+}
+
+/* Adding files and folders */
+
+let sheet = null;
+const layer = document.getElementById("layer");
+
+function closeSheet() {
+  sheet = null;
+  layer.innerHTML = "";
+}
+
+async function addSource(source) {
+  if (await mutate("POST", "/api/mount", { source, mode: "rw" })) toast(`Added ${tilde(source)}`);
+}
+
+// Browse: a click on a folder opens it, Add gives the agent access.
+async function showBrowser(kind) {
+  sheet = { kind, path: null, entries: [] };
+  await browseTo(kind === "project" ? state.home : (selected || state.current));
+}
+
+async function browseTo(path) {
+  try {
+    const v = await api("GET", "/api/browse?path=" + encodeURIComponent(path));
+    Object.assign(sheet, { path: v.path, entries: v.entries });
+    renderBrowser(0);
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function renderBrowser(scroll) {
+  const s = sheet;
+  const project = s.kind === "project";
+  const added = new Set((state.entries || []).map(e => e.source));
+  const parts = s.path.split("/").filter(Boolean);
+  const crumbs = `<button data-go="/">/</button>` + parts.map((p, i) =>
+    `<span class="sep">${svg("chevron", 10)}</span><button data-go="${esc("/" + parts.slice(0, i + 1).join("/"))}">${esc(p)}</button>`).join("");
+
+  const rows = s.entries.filter(e => !project || e.dir).map(e => {
+    const opens = e.dir && !e.sensitive;
+    let action = "";
+    if (e.sensitive) action = `<span class="badge">Never mounted</span>`;
+    else if (!project) action = added.has(e.path) ? `<span class="added">✓ Added</span>` : `<button class="pill" data-add="${esc(e.path)}">Add</button>`;
+    return `
+      <div class="entry ${opens ? "dir" : ""} ${e.sensitive ? "locked" : ""}" ${opens ? `data-open="${esc(e.path)}"` : ""}>
+        ${e.sensitive ? icon("lock", "var(--gray)") : icon(e.dir ? "folder" : "file", e.dir ? "var(--blue)" : "var(--gray)")}
+        <span class="name">${esc(e.name)}</span>
+        ${action}
+        <span class="chev">${opens ? svg("chevron", 12) : ""}</span>
+      </div>`;
+  }).join("") || `<div class="entry" style="color:var(--text-2)">Empty folder</div>`;
+
+  const here = esc(parts.length ? parts[parts.length - 1] : "/");
+  const foot = project
+    ? `<span class="spacer"></span><button class="button" data-cancel>Cancel</button><button class="button primary" data-choose-project>Open “${here}”</button>`
+    : `${added.has(s.path) ? "" : `<button class="button" data-add="${esc(s.path)}">Add “${here}”</button>`}<span class="spacer"></span><button class="button primary" data-cancel>Done</button>`;
+
+  layer.innerHTML = `
+    <div class="backdrop" data-close>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <h3 id="sheet-title">${project ? "Add Project" : "Add Files or Folders"}</h3>
+        <p class="hint">${project ? "Open the folder you run exile start in." : "Click a folder to open it."}</p>
+        <div class="crumbs">${crumbs}</div>
+        <div class="browser" id="browser">${rows}</div>
+        <div class="sheet-foot">${foot}</div>
+      </div>
+    </div>`;
+  document.getElementById("browser").scrollTop = scroll;
+}
+
+layer.addEventListener("click", async e => {
+  if (!sheet) return;
+  const t = e.target;
+  if (t.matches("[data-close]") || t.closest("[data-cancel]")) return closeSheet();
+  const go = t.closest("[data-go]");
+  if (go) return browseTo(go.dataset.go);
+  const add = t.closest("[data-add]");
+  if (add) {
+    add.disabled = true;
+    await addSource(add.dataset.add);
+    if (sheet) renderBrowser(document.getElementById("browser").scrollTop);
+    return;
+  }
+  const open = t.closest("[data-open]");
+  if (open) return browseTo(open.dataset.open);
+  if (t.closest("[data-choose-project]")) {
+    const dir = sheet.path;
+    if (!state.projects.includes(dir)) extraProjects.push(dir);
+    closeSheet();
+    return load(dir);
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && sheet) closeSheet();
+});
+
+// Drop: browsers only reveal the names, sizes and dates of dropped items,
+// so exile looks them up on the Mac and adds them if it finds exactly one.
+let dragDepth = 0;
+const draggingFiles = e => e.dataTransfer && [...e.dataTransfer.types].includes("Files");
+
+document.addEventListener("dragenter", e => {
+  if (!draggingFiles(e)) return;
+  e.preventDefault();
+  dragDepth++;
+  document.body.classList.add("dragging");
+});
+document.addEventListener("dragleave", e => {
+  if (draggingFiles(e) && --dragDepth <= 0) {
+    dragDepth = 0;
+    document.body.classList.remove("dragging");
+  }
+});
+document.addEventListener("dragover", e => {
+  if (draggingFiles(e)) e.preventDefault();
+});
+document.addEventListener("drop", e => {
+  if (!draggingFiles(e)) return;
+  e.preventDefault();
+  dragDepth = 0;
+  document.body.classList.remove("dragging");
+  // The entries must be taken while the event is being handled.
+  const entries = [...e.dataTransfer.items].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if (entries.length) addDropped(entries);
+});
+
+function describe(entry) {
+  if (entry.isDirectory) {
+    return new Promise(resolve => entry.createReader().readEntries(
+      list => resolve({ name: entry.name, dir: true, children: list.map(c => c.name) }),
+      () => resolve({ name: entry.name, dir: true, children: [] })));
+  }
+  return new Promise((resolve, reject) => entry.file(
+    f => resolve({ name: entry.name, dir: false, size: f.size, modified: f.lastModified }), reject));
+}
+
+async function addDropped(entries) {
+  try {
+    const items = await Promise.all(entries.map(describe));
+    const { items: found } = await api("POST", "/api/locate", { items });
+    for (const it of found) {
+      const paths = it.candidates.filter(c => !c.sensitive).map(c => c.path);
+      if (paths.length === 1) await addSource(paths[0]);
+      else if (it.candidates.length && !paths.length) toast(`exile never mounts ${it.name}: it holds credentials or controls your Mac.`, true);
+      else if (paths.length > 1) toast(`Found ${it.name} in ${paths.length} places. Use “browse your Mac” to pick one.`, true);
+      else toast(`Couldn’t find ${it.name} on your Mac. Use “browse your Mac” instead.`, true);
+    }
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+/* Toast */
+
+let toastTimer;
+function toast(message, error = false) {
+  clearTimeout(toastTimer);
+  let el = document.querySelector(".toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.setAttribute("role", "status");
+    document.body.append(el);
+  }
+  el.className = "toast" + (error ? " error" : "");
+  el.textContent = message;
+  toastTimer = setTimeout(() => el.remove(), error ? 6000 : 2500);
+}
+
+if (!token) {
+  document.getElementById("page").innerHTML = '<div class="banner">Open the link printed by <b>exile ui</b>.</div>';
+} else {
+  load();
+}
+</script>
+</body>
+</html>
